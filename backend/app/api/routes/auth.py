@@ -28,39 +28,48 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
     Create a new user account.
     Also creates a default organization for the user.
     """
-    # Check if user already exists
-    existing_user = db.query(User).filter(User.email == request.email).first()
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered",
+    try:
+        # Check if user already exists
+        existing_user = db.query(User).filter(User.email == request.email).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered",
+            )
+
+        # Create new user
+        hashed_password = get_password_hash(request.password)
+        new_user = User(
+            email=request.email,
+            hashed_password=hashed_password,
         )
+        db.add(new_user)
+        db.flush()  # Flush to get the user ID
 
-    # Create new user
-    hashed_password = get_password_hash(request.password)
-    new_user = User(
-        email=request.email,
-        hashed_password=hashed_password,
-    )
-    db.add(new_user)
-    db.flush()  # Flush to get the user ID
+        # Create default organization
+        org_name = f"{request.email.split('@')[0]}'s Organization"
+        new_org = Organization(name=org_name)
+        db.add(new_org)
+        db.flush()
 
-    # Create default organization
-    org_name = f"{request.email.split('@')[0]}'s Organization"
-    new_org = Organization(name=org_name)
-    db.add(new_org)
-    db.flush()
+        # Link user to organization
+        user_org = UserOrganization(
+            user_id=new_user.id, organization_id=new_org.id, role="owner"
+        )
+        db.add(user_org)
 
-    # Link user to organization
-    user_org = UserOrganization(
-        user_id=new_user.id, organization_id=new_org.id, role="owner"
-    )
-    db.add(user_org)
+        db.commit()
+        db.refresh(new_user)
 
-    db.commit()
-    db.refresh(new_user)
-
-    return new_user
+        return new_user
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Signup failed: {str(e)}",
+        )
 
 
 @router.post("/login", response_model=Token)

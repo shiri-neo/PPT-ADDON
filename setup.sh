@@ -66,11 +66,12 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "Setting up database..."
-python init_db.py
+echo "Testing backend setup..."
+python test_setup.py
 
 if [ $? -ne 0 ]; then
-    echo "❌ Failed to set up database"
+    echo -e "${RED}❌ Backend setup test failed${NC}"
+    echo -e "${YELLOW}Please check the errors above${NC}"
     exit 1
 fi
 

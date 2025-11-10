@@ -1,8 +1,10 @@
 """Application configuration using Pydantic Settings"""
 
+import json
 from functools import lru_cache
 from typing import List, Optional
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -30,6 +32,16 @@ class Settings(BaseSettings):
 
     # CORS
     cors_allowed_origins: List[str] = ["http://localhost:5173"]
+
+    @field_validator('cors_allowed_origins', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return [v]
+        return v
 
     model_config = SettingsConfigDict(
         env_file=".env",
