@@ -1,9 +1,12 @@
 """Authentication endpoints"""
 
+import logging
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 from app.api.deps import get_db
 from app.core.config import get_settings
@@ -29,28 +32,36 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
     Also creates a default organization for the user.
     """
     try:
+        logger.info(f"Signup attempt for email: {request.email}")
+
         # Check if user already exists
         existing_user = db.query(User).filter(User.email == request.email).first()
         if existing_user:
+            logger.warning(f"Email already registered: {request.email}")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered",
             )
 
         # Create new user
+        logger.info("Hashing password...")
         hashed_password = get_password_hash(request.password)
+        logger.info("Password hashed successfully")
+
         new_user = User(
             email=request.email,
             hashed_password=hashed_password,
         )
         db.add(new_user)
         db.flush()  # Flush to get the user ID
+        logger.info(f"User created with ID: {new_user.id}")
 
         # Create default organization
         org_name = f"{request.email.split('@')[0]}'s Organization"
         new_org = Organization(name=org_name)
         db.add(new_org)
         db.flush()
+        logger.info(f"Organization created with ID: {new_org.id}")
 
         # Link user to organization
         user_org = UserOrganization(
@@ -61,10 +72,12 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(new_user)
 
+        logger.info(f"Signup successful for: {request.email}")
         return new_user
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"Signup error: {str(e)}", exc_info=True)
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
