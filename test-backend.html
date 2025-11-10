@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Backend Test</title>
+</head>
+<body>
+    <h1>Backend Connection Test</h1>
+    <button onclick="testBackend()">Test Backend Connection</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testBackend() {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = 'Testing...';
+
+            try {
+                // Test 1: Health endpoint
+                const healthResponse = await fetch('http://localhost:8000/health');
+                const healthData = await healthResponse.json();
+                resultEl.textContent += '\n✓ Health check: ' + JSON.stringify(healthData);
+
+                // Test 2: Root endpoint
+                const rootResponse = await fetch('http://localhost:8000/');
+                const rootData = await rootResponse.json();
+                resultEl.textContent += '\n✓ Root endpoint: ' + JSON.stringify(rootData);
+
+                // Test 3: Signup
+                const signupResponse = await fetch('http://localhost:8000/auth/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test' + Date.now() + '@example.com',
+                        password: 'password123'
+                    })
+                });
+
+                if (signupResponse.ok) {
+                    const signupData = await signupResponse.json();
+                    resultEl.textContent += '\n✓ Signup successful: ' + JSON.stringify(signupData);
+                } else {
+                    const error = await signupResponse.text();
+                    resultEl.textContent += '\n✗ Signup failed: ' + error;
+                }
+
+            } catch (error) {
+                resultEl.textContent += '\n✗ Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

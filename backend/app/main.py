@@ -1,12 +1,27 @@
 """FastAPI application entry point"""
 
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.api.routes import health, auth, documents, presentations
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 settings = get_settings()
+
+# Log startup configuration
+logger.info(f"Starting {settings.app_name}")
+logger.info(f"Debug mode: {settings.debug}")
+logger.info(f"Database: {settings.database_url}")
+logger.info(f"CORS origins: {settings.cors_allowed_origins}")
 
 # Create FastAPI application
 app = FastAPI(
@@ -16,13 +31,15 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# Configure CORS
+# Configure CORS - Allow all origins in development
+# This fixes CORS network errors when frontend calls backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_allowed_origins,
+    allow_origins=["*"],  # Allow all origins in development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Include routers
