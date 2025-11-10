@@ -21,11 +21,24 @@ fi
 echo "Activating virtual environment..."
 source venv/bin/activate
 
+echo "Upgrading pip..."
+pip install --upgrade pip setuptools wheel
+
 echo "Installing Python dependencies..."
-pip install -q -r requirements.txt
+pip install -r requirements.txt
+
+if [ $? -ne 0 ]; then
+    echo "❌ Failed to install Python dependencies"
+    exit 1
+fi
 
 echo "Setting up database..."
 python init_db.py
+
+if [ $? -ne 0 ]; then
+    echo "❌ Failed to set up database"
+    exit 1
+fi
 
 cd ..
 echo -e "${GREEN}✅ Backend setup complete!${NC}"
