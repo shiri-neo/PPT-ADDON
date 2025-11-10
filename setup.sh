@@ -47,6 +47,18 @@ echo ""
 echo -e "${BLUE}📦 Setting up Backend...${NC}"
 cd backend
 
+# Create/update .env file with SQLite configuration
+echo "Creating .env configuration..."
+cat > .env << 'EOF'
+APP_NAME=ppt-ai-backend
+DEBUG=True
+DATABASE_URL=sqlite:///./pptai.db
+JWT_SECRET_KEY=dev-secret-key-change-in-production-12345678
+JWT_ALGORITHM=HS256
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=60
+CORS_ALLOWED_ORIGINS=["http://localhost:5173","https://localhost:5173"]
+EOF
+
 if [ ! -d "venv" ]; then
     echo "Creating Python virtual environment with $PYTHON_CMD..."
     $PYTHON_CMD -m venv venv
@@ -82,6 +94,12 @@ echo ""
 # Frontend setup
 echo -e "${BLUE}📦 Setting up Frontend...${NC}"
 cd frontend
+
+# Create/update .env file with API URL
+echo "Creating .env configuration..."
+cat > .env << 'EOF'
+VITE_API_BASE_URL=http://localhost:8000
+EOF
 
 echo "Installing Node dependencies..."
 npm install
