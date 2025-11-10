@@ -2,6 +2,22 @@
 
 A full-stack application that allows users to generate and edit PowerPoint presentations using AI, integrated as a PowerPoint Task Pane Add-in.
 
+> **🚀 Want to get started quickly?** See [QUICKSTART.md](./QUICKSTART.md) for a 5-minute setup guide!
+
+## Quick Start
+
+```bash
+# 1. Run setup (first time only)
+./setup.sh
+
+# 2. Start the application
+./run.sh
+```
+
+That's it! Visit http://localhost:5173 to use the app.
+
+---
+
 ## Architecture
 
 - **Backend**: Python FastAPI + PostgreSQL + SQLAlchemy + JWT Auth
