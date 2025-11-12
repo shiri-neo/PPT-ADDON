@@ -3,10 +3,12 @@
 import uuid
 from typing import Optional
 
-import boto3
 from fastapi import UploadFile
 
 from app.core.config import get_settings
+
+# Note: boto3 import removed - will be added when implementing real S3 functionality
+# TODO: Add 'boto3' to requirements.txt when ready to implement actual S3 uploads
 
 settings = get_settings()
 
