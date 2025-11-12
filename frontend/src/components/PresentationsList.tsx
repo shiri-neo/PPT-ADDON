@@ -5,12 +5,18 @@
 import React, { useEffect, useState } from 'react';
 import { presentationsApi, Presentation } from '../api/presentations';
 import { applySlides } from '../office/PowerPointIntegration';
+import apiClient from '../api/client';
 
 interface PresentationsListProps {
   onSelect?: (presentationId: number) => void;
   selectedPresentationId?: number | null;
   refreshTrigger?: number;
 }
+
+// Check if we're running in PowerPoint
+const isInPowerPoint = (): boolean => {
+  return typeof PowerPoint !== 'undefined' && PowerPoint !== null;
+};
 
 const PresentationsList: React.FC<PresentationsListProps> = ({
   onSelect,
@@ -21,6 +27,7 @@ const PresentationsList: React.FC<PresentationsListProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [applyingId, setApplyingId] = useState<number | null>(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const fetchPresentations = async () => {
     setLoading(true);
@@ -48,11 +55,69 @@ const PresentationsList: React.FC<PresentationsListProps> = ({
   const handleApplyToPowerPoint = async (presentation: Presentation, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering the click handler
     setApplyingId(presentation.id);
+    setSuccessMessage('');
+    setError('');
+
     try {
       await applySlides(presentation.slides);
-      alert(`Applied "${presentation.title}" to PowerPoint!`);
+      console.log(`✅ Applied "${presentation.title}" to PowerPoint!`);
+      setSuccessMessage(`Applied "${presentation.title}" to PowerPoint!`);
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err: any) {
-      alert(`Failed to apply slides: ${err.message}`);
+      console.error('❌ Failed to apply slides:', err);
+      setError(`Failed to apply slides: ${err.message}`);
+    } finally {
+      setApplyingId(null);
+    }
+  };
+
+  const handleDownloadPPTX = async (presentation: Presentation, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the click handler
+    setApplyingId(presentation.id);
+    setSuccessMessage('');
+    setError('');
+
+    try {
+      // Get the auth token
+      const token = localStorage.getItem('token');
+
+      // Download the file
+      const response = await fetch(
+        `${apiClient.defaults.baseURL}/presentations/${presentation.id}/download`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to download presentation');
+      }
+
+      // Create a blob from the response
+      const blob = await response.blob();
+
+      // Create a download link and trigger it
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${presentation.title}.pptx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      console.log(`✅ Downloaded "${presentation.title}.pptx"`);
+      setSuccessMessage(`Downloaded "${presentation.title}.pptx"`);
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err: any) {
+      console.error('❌ Failed to download presentation:', err);
+      setError(`Failed to download: ${err.message}`);
     } finally {
       setApplyingId(null);
     }
@@ -76,9 +141,16 @@ const PresentationsList: React.FC<PresentationsListProps> = ({
     );
   }
 
+  const inPowerPoint = isInPowerPoint();
+
   return (
     <div style={styles.container}>
-      <h3 style={styles.heading}>Presentations</h3>
+      <h3 style={styles.heading}>
+        Presentations {!inPowerPoint && <span style={styles.browserBadge}>(Browser Mode)</span>}
+      </h3>
+
+      {successMessage && <div style={styles.success}>{successMessage}</div>}
+      {error && <div style={styles.error}>{error}</div>}
 
       {presentations.length === 0 ? (
         <p style={styles.emptyMessage}>No presentations created yet.</p>
@@ -99,13 +171,24 @@ const PresentationsList: React.FC<PresentationsListProps> = ({
                   {preso.slides.length} slides • {new Date(preso.created_at).toLocaleDateString()}
                 </div>
               </div>
-              <button
-                onClick={(e) => handleApplyToPowerPoint(preso, e)}
-                disabled={applyingId === preso.id}
-                style={styles.applyButton}
-              >
-                {applyingId === preso.id ? 'Applying...' : 'Apply to PPT'}
-              </button>
+
+              {inPowerPoint ? (
+                <button
+                  onClick={(e) => handleApplyToPowerPoint(preso, e)}
+                  disabled={applyingId === preso.id}
+                  style={styles.applyButton}
+                >
+                  {applyingId === preso.id ? 'Applying...' : 'Apply to PPT'}
+                </button>
+              ) : (
+                <button
+                  onClick={(e) => handleDownloadPPTX(preso, e)}
+                  disabled={applyingId === preso.id}
+                  style={styles.downloadButton}
+                >
+                  {applyingId === preso.id ? 'Downloading...' : 'Download PPTX'}
+                </button>
+              )}
             </li>
           ))}
         </ul>
@@ -126,6 +209,17 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginTop: 0,
     marginBottom: '15px',
     fontSize: '18px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  },
+  browserBadge: {
+    fontSize: '12px',
+    fontWeight: 'normal',
+    color: '#666',
+    backgroundColor: '#e0e0e0',
+    padding: '2px 8px',
+    borderRadius: '4px',
   },
   list: {
     listStyle: 'none',
@@ -171,11 +265,31 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     marginLeft: '10px',
   },
+  downloadButton: {
+    padding: '6px 12px',
+    backgroundColor: '#0078d4',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    fontSize: '12px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    marginLeft: '10px',
+  },
   emptyMessage: {
     color: '#666',
     fontSize: '14px',
   },
+  success: {
+    marginBottom: '15px',
+    padding: '10px',
+    backgroundColor: '#d4edda',
+    color: '#155724',
+    borderRadius: '4px',
+    fontSize: '14px',
+  },
   error: {
+    marginBottom: '15px',
     padding: '10px',
     backgroundColor: '#f8d7da',
     color: '#721c24',
