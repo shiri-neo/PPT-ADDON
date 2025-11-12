@@ -6,7 +6,11 @@ import React, { useEffect, useState } from 'react';
 import { documentsApi } from '../api/documents';
 import { presentationsApi } from '../api/presentations';
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+  onNavigate?: (page: string) => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [stats, setStats] = useState({
     documents: 0,
     presentations: 0,
@@ -73,17 +77,26 @@ const Dashboard: React.FC = () => {
       <div style={styles.quickActions}>
         <h2 style={styles.sectionTitle}>Quick Actions</h2>
         <div style={styles.actionsGrid}>
-          <div style={styles.actionCard}>
+          <div
+            style={styles.actionCard}
+            onClick={() => onNavigate?.('documents')}
+          >
             <h3 style={styles.actionTitle}>📤 Upload Document</h3>
             <p style={styles.actionDesc}>Upload a PDF, DOCX, TXT, or PPTX file to get started</p>
           </div>
 
-          <div style={styles.actionCard}>
+          <div
+            style={styles.actionCard}
+            onClick={() => onNavigate?.('presentations')}
+          >
             <h3 style={styles.actionTitle}>✨ Generate Presentation</h3>
             <p style={styles.actionDesc}>Let AI create branded slides from your documents</p>
           </div>
 
-          <div style={styles.actionCard}>
+          <div
+            style={styles.actionCard}
+            onClick={() => onNavigate?.('settings')}
+          >
             <h3 style={styles.actionTitle}>⚙️ Configure Branding</h3>
             <p style={styles.actionDesc}>Set your company colors, logo, and design style</p>
           </div>
