@@ -16,6 +16,7 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ presentationId }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [buttonHover, setButtonHover] = useState(false);
 
   const handleEdit = async () => {
     if (!presentationId) {
@@ -88,7 +89,17 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ presentationId }) => {
           />
         </div>
 
-        <button onClick={handleEdit} disabled={loading || !presentationId} style={styles.button}>
+        <button
+          onClick={handleEdit}
+          disabled={loading || !presentationId}
+          style={{
+            ...styles.button,
+            ...(loading || !presentationId ? styles.buttonDisabled : {}),
+            ...(buttonHover && !loading && presentationId ? styles.buttonHover : {}),
+          }}
+          onMouseEnter={() => setButtonHover(true)}
+          onMouseLeave={() => setButtonHover(false)}
+        >
           {loading ? 'Applying Edit...' : 'Apply Edit'}
         </button>
       </div>
@@ -153,6 +164,17 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
     fontWeight: 500,
     cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
+    cursor: 'not-allowed',
+    opacity: 0.6,
+  },
+  buttonHover: {
+    backgroundColor: '#106ebe',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
   },
   warning: {
     padding: '10px',

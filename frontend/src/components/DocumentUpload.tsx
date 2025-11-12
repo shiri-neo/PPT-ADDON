@@ -14,6 +14,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadSuccess }) => {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [buttonHover, setButtonHover] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -71,7 +72,17 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadSuccess }) => {
           {file && <p style={styles.fileName}>Selected: {file.name}</p>}
         </div>
 
-        <button type="submit" disabled={uploading || !file} style={styles.button}>
+        <button
+          type="submit"
+          disabled={uploading || !file}
+          style={{
+            ...styles.button,
+            ...(uploading || !file ? styles.buttonDisabled : {}),
+            ...(buttonHover && !uploading && file ? styles.buttonHover : {}),
+          }}
+          onMouseEnter={() => setButtonHover(true)}
+          onMouseLeave={() => setButtonHover(false)}
+        >
           {uploading ? 'Uploading...' : 'Upload'}
         </button>
       </form>
@@ -120,6 +131,17 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
     fontWeight: 500,
     cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
+    cursor: 'not-allowed',
+    opacity: 0.6,
+  },
+  buttonHover: {
+    backgroundColor: '#106ebe',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
   },
   success: {
     marginTop: '10px',

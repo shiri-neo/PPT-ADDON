@@ -21,6 +21,7 @@ const PresentationGenerator: React.FC<PresentationGeneratorProps> = ({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [buttonHover, setButtonHover] = useState(false);
 
   const handleGenerate = async () => {
     if (!selectedDocumentId) {
@@ -109,7 +110,13 @@ const PresentationGenerator: React.FC<PresentationGeneratorProps> = ({
         <button
           onClick={handleGenerate}
           disabled={loading || !selectedDocumentId}
-          style={styles.button}
+          style={{
+            ...styles.button,
+            ...(loading || !selectedDocumentId ? styles.buttonDisabled : {}),
+            ...(buttonHover && !loading && selectedDocumentId ? styles.buttonHover : {}),
+          }}
+          onMouseEnter={() => setButtonHover(true)}
+          onMouseLeave={() => setButtonHover(false)}
         >
           {loading ? 'Generating...' : 'Generate Presentation'}
         </button>
@@ -185,6 +192,17 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
     fontWeight: 500,
     cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
+    cursor: 'not-allowed',
+    opacity: 0.6,
+  },
+  buttonHover: {
+    backgroundColor: '#106ebe',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
   },
   warning: {
     padding: '10px',

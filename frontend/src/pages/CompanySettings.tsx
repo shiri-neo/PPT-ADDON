@@ -20,6 +20,8 @@ const CompanySettings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [hoveredStyleButton, setHoveredStyleButton] = useState<string | null>(null);
+  const [saveButtonHover, setSaveButtonHover] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -190,7 +192,10 @@ const CompanySettings: React.FC = () => {
                   style={{
                     ...styles.styleButton,
                     ...(settings.design_style === style ? styles.styleButtonActive : {}),
+                    ...(hoveredStyleButton === style && settings.design_style !== style ? styles.styleButtonHover : {}),
                   }}
+                  onMouseEnter={() => setHoveredStyleButton(style)}
+                  onMouseLeave={() => setHoveredStyleButton(null)}
                 >
                   {style.charAt(0).toUpperCase() + style.slice(1)}
                 </button>
@@ -219,7 +224,13 @@ const CompanySettings: React.FC = () => {
         <button
           onClick={handleSave}
           disabled={saving}
-          style={styles.saveButton}
+          style={{
+            ...styles.saveButton,
+            ...(saving ? styles.saveButtonDisabled : {}),
+            ...(saveButtonHover && !saving ? styles.saveButtonHover : {}),
+          }}
+          onMouseEnter={() => setSaveButtonHover(true)}
+          onMouseLeave={() => setSaveButtonHover(false)}
         >
           {saving ? 'Saving...' : 'Save Settings'}
         </button>
@@ -338,6 +349,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: 'white',
     borderColor: '#0078d4',
   },
+  styleButtonHover: {
+    backgroundColor: '#e0e0e0',
+    borderColor: '#0078d4',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+  },
   preview: {
     display: 'flex',
     gap: '16px',
@@ -360,6 +377,17 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: 600,
     cursor: 'pointer',
     alignSelf: 'flex-start',
+    transition: 'all 0.2s',
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#ccc',
+    cursor: 'not-allowed',
+    opacity: 0.6,
+  },
+  saveButtonHover: {
+    backgroundColor: '#218838',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
   },
   success: {
     padding: '12px',

@@ -28,6 +28,7 @@ const PresentationsList: React.FC<PresentationsListProps> = ({
   const [error, setError] = useState('');
   const [applyingId, setApplyingId] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [hoveredButtonId, setHoveredButtonId] = useState<string | null>(null);
 
   const fetchPresentations = async () => {
     setLoading(true);
@@ -176,7 +177,13 @@ const PresentationsList: React.FC<PresentationsListProps> = ({
                 <button
                   onClick={(e) => handleApplyToPowerPoint(preso, e)}
                   disabled={applyingId === preso.id}
-                  style={styles.applyButton}
+                  style={{
+                    ...styles.applyButton,
+                    ...(applyingId === preso.id ? styles.buttonDisabled : {}),
+                    ...(hoveredButtonId === `apply-${preso.id}` && applyingId !== preso.id ? styles.applyButtonHover : {}),
+                  }}
+                  onMouseEnter={() => setHoveredButtonId(`apply-${preso.id}`)}
+                  onMouseLeave={() => setHoveredButtonId(null)}
                 >
                   {applyingId === preso.id ? 'Applying...' : 'Apply to PPT'}
                 </button>
@@ -184,7 +191,13 @@ const PresentationsList: React.FC<PresentationsListProps> = ({
                 <button
                   onClick={(e) => handleDownloadPPTX(preso, e)}
                   disabled={applyingId === preso.id}
-                  style={styles.downloadButton}
+                  style={{
+                    ...styles.downloadButton,
+                    ...(applyingId === preso.id ? styles.buttonDisabled : {}),
+                    ...(hoveredButtonId === `download-${preso.id}` && applyingId !== preso.id ? styles.downloadButtonHover : {}),
+                  }}
+                  onMouseEnter={() => setHoveredButtonId(`download-${preso.id}`)}
+                  onMouseLeave={() => setHoveredButtonId(null)}
                 >
                   {applyingId === preso.id ? 'Downloading...' : 'Download PPTX'}
                 </button>
@@ -264,6 +277,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: 500,
     cursor: 'pointer',
     marginLeft: '10px',
+    transition: 'all 0.2s',
+  },
+  applyButtonHover: {
+    backgroundColor: '#218838',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
   },
   downloadButton: {
     padding: '6px 12px',
@@ -275,6 +294,16 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: 500,
     cursor: 'pointer',
     marginLeft: '10px',
+    transition: 'all 0.2s',
+  },
+  downloadButtonHover: {
+    backgroundColor: '#106ebe',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+    cursor: 'not-allowed',
   },
   emptyMessage: {
     color: '#666',
