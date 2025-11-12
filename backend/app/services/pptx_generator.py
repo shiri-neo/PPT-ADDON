@@ -6,9 +6,10 @@ from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
-import requests
 
 from app.models.presentation import Presentation as PresentationModel
+
+# TODO: Add 'import requests' when implementing logo download from URL
 
 
 def hex_to_rgb(hex_color: str) -> tuple:
