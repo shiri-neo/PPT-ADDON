@@ -78,7 +78,7 @@ const PresentationGenerator: React.FC<PresentationGeneratorProps> = ({
             min={1}
             max={20}
             value={slideCount}
-            onChange={(e) => setSlideCount(parseInt(e.target.value))}
+            onChange={(e) => setSlideCount(parseInt(e.target.value) || 5)}
             style={styles.input}
           />
         </div>
