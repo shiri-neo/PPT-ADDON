@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.api.routes import health, auth, documents, presentations
+from app.api.routes import health, auth, documents, presentations, organization
 
 # Configure logging
 logging.basicConfig(
@@ -48,6 +48,9 @@ app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(documents.router, prefix="/documents", tags=["Documents"])
 app.include_router(
     presentations.router, prefix="/presentations", tags=["Presentations"]
+)
+app.include_router(
+    organization.router, prefix="/organization", tags=["Organization"]
 )
 
 
