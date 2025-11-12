@@ -15,26 +15,42 @@ def create_presentation_from_document(
     slide_count: int,
     tone: Optional[str],
     organization_id: int,
+    custom_instructions: Optional[str],
+    organization,
     db: Session,
 ) -> Presentation:
     """
-    Create a presentation from a document using AI.
+    Create a presentation from a document using AI with company branding.
 
     Args:
         document: Source document
         slide_count: Number of slides to generate
         tone: Presentation tone (formal, casual, etc.)
         organization_id: Organization ID
+        custom_instructions: User's specific instructions
+        organization: Organization model (for branding)
         db: Database session
 
     Returns:
         Created Presentation object with slides
     """
-    # Generate slides using LLM (stubbed)
+    # Prepare company branding
+    company_branding = {
+        "primary_color": organization.primary_color,
+        "secondary_color": organization.secondary_color,
+        "accent_color": organization.accent_color,
+        "design_style": organization.design_style,
+        "font_family": organization.font_family,
+    }
+
+    # Generate slides using LLM with AI analysis and branding
     slides_data = generate_presentation_from_document(
         document_text=document.parsed_text or "",
         slide_count=slide_count,
         tone=tone,
+        custom_instructions=custom_instructions,
+        company_branding=company_branding,
+        document_name=document.name,
     )
 
     # Create presentation

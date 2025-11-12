@@ -91,8 +91,8 @@ def download_presentation(
             detail="Presentation not found",
         )
 
-    # Generate PPTX file
-    pptx_file = generate_pptx_file(presentation)
+    # Generate PPTX file with company branding
+    pptx_file = generate_pptx_file(presentation, organization=current_org)
 
     # Create safe filename
     safe_title = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in presentation.title)
@@ -135,12 +135,14 @@ def generate_presentation_from_document(
             detail="Document not found",
         )
 
-    # Create presentation with slides
+    # Create presentation with slides using AI and company branding
     presentation = create_presentation_from_document(
         document=document,
         slide_count=request.slide_count,
         tone=request.tone,
         organization_id=current_org.id,
+        custom_instructions=request.custom_instructions,
+        organization=current_org,
         db=db,
     )
 

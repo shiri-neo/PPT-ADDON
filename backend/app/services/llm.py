@@ -1,9 +1,11 @@
-"""AI/LLM service for content generation (stubbed with fake data)"""
+"""AI/LLM service for content generation using OpenAI (with stubbed responses)"""
 
-from typing import List, Optional
+from typing import List, Optional, Dict
+import asyncio
 
 from app.schemas.presentation import SlideSchema
 from app.core.config import get_settings
+from app.services.ai_service import ai_service
 
 settings = get_settings()
 
@@ -13,7 +15,12 @@ settings = get_settings()
 
 
 def generate_presentation_from_document(
-    document_text: str, slide_count: int, tone: Optional[str] = None
+    document_text: str,
+    slide_count: int,
+    tone: Optional[str] = None,
+    custom_instructions: Optional[str] = None,
+    company_branding: Optional[Dict[str, str]] = None,
+    document_name: Optional[str] = "Uploaded Document"
 ) -> List[SlideSchema]:
     """
     Generate presentation slides from document text using AI.
@@ -22,55 +29,54 @@ def generate_presentation_from_document(
         document_text: The parsed text from the document
         slide_count: Number of slides to generate
         tone: Optional tone (formal, casual, marketing, academic)
+        custom_instructions: User's specific instructions for the presentation
+        company_branding: Company branding settings (colors, style, logo)
+        document_name: Name of the source document
 
     Returns:
         List of SlideSchema objects
 
-    TODO: Implement actual OpenAI API call
+    TODO: This uses the AI service with stubbed responses. When ready to use real OpenAI:
+          1. Set OPENAI_API_KEY in .env
+          2. Uncomment OpenAI initialization in ai_service.py
+          3. The stubbed responses will be replaced with real AI-generated content
     """
-    # TODO: Call OpenAI API to generate slides
-    # Example:
-    # prompt = f"Create {slide_count} presentation slides from this document with a {tone} tone:\n\n{document_text}"
-    # response = openai.ChatCompletion.create(
-    #     model="gpt-4",
-    #     messages=[{"role": "user", "content": prompt}],
-    # )
-    # Parse response and convert to SlideSchema objects
+    # Default branding if not provided
+    if not company_branding:
+        company_branding = {
+            "primary_color": "#0078D4",
+            "secondary_color": "#106EBE",
+            "accent_color": "#00BCF2",
+            "design_style": "professional",
+            "font_family": "Arial"
+        }
 
-    # STUB: Return fake slides
-    fake_slides = [
-        SlideSchema(
-            title="Introduction",
-            bullets=[
-                "Welcome to the presentation",
-                "Overview of key topics",
-                "What you'll learn today",
-            ],
-            notes="This is an introductory slide generated from your document.",
-        ),
-        SlideSchema(
-            title="Main Points",
-            bullets=[
-                "First major concept from document",
-                "Second key insight",
-                "Third important detail",
-                "Supporting evidence",
-            ],
-            notes="These points were extracted from the document content.",
-        ),
-        SlideSchema(
-            title="Conclusion",
-            bullets=[
-                "Summary of key takeaways",
-                "Next steps and actions",
-                "Questions and discussion",
-            ],
-            notes="Concluding thoughts and call to action.",
-        ),
-    ]
+    # Step 1: Analyze the document using AI
+    analysis = asyncio.run(ai_service.analyze_document(
+        document_content=document_text,
+        document_name=document_name,
+        custom_instructions=custom_instructions
+    ))
 
-    # Return the requested number of slides (or all fake slides if less)
-    return fake_slides[:slide_count]
+    # Step 2: Generate presentation structure using AI
+    slides_data = asyncio.run(ai_service.generate_presentation_structure(
+        analysis=analysis,
+        slide_count=slide_count,
+        tone=tone or "professional",
+        company_branding=company_branding,
+        custom_instructions=custom_instructions
+    ))
+
+    # Step 3: Convert to SlideSchema objects
+    slides = []
+    for slide_data in slides_data:
+        slides.append(SlideSchema(
+            title=slide_data["title"],
+            bullets=slide_data["bullets"],
+            notes=slide_data.get("notes", "")
+        ))
+
+    return slides
 
 
 def edit_slide_content(slide: SlideSchema, instruction: str) -> SlideSchema:
@@ -84,26 +90,23 @@ def edit_slide_content(slide: SlideSchema, instruction: str) -> SlideSchema:
     Returns:
         Updated SlideSchema
 
-    TODO: Implement actual OpenAI API call
+    TODO: This uses the AI service with stubbed responses. Real OpenAI will refine based on instruction.
     """
-    # TODO: Call OpenAI API to edit slide
-    # Example:
-    # prompt = f"Edit this slide based on the instruction.\n\nSlide:\nTitle: {slide.title}\nBullets: {slide.bullets}\n\nInstruction: {instruction}"
-    # response = openai.ChatCompletion.create(
-    #     model="gpt-4",
-    #     messages=[{"role": "user", "content": prompt}],
-    # )
-    # Parse response and update slide
+    # Convert SlideSchema to dict for AI service
+    slide_dict = {
+        "title": slide.title,
+        "bullets": slide.bullets,
+        "notes": slide.notes
+    }
 
-    # STUB: Return slide with "(edited)" appended
-    edited_title = f"{slide.title} (edited)"
-    edited_bullets = [f"{bullet} (edited)" for bullet in slide.bullets]
-    edited_notes = (
-        f"{slide.notes} (edited by: {instruction})" if slide.notes else instruction
-    )
+    # Use AI service to refine slide
+    edited_slide = asyncio.run(ai_service.refine_slide_content(
+        slide_content=slide_dict,
+        instruction=instruction
+    ))
 
     return SlideSchema(
-        title=edited_title,
-        bullets=edited_bullets,
-        notes=edited_notes,
+        title=edited_slide["title"],
+        bullets=edited_slide["bullets"],
+        notes=edited_slide.get("notes", "")
     )

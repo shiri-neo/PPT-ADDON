@@ -17,6 +17,7 @@ const PresentationGenerator: React.FC<PresentationGeneratorProps> = ({
 }) => {
   const [slideCount, setSlideCount] = useState(5);
   const [tone, setTone] = useState('formal');
+  const [customInstructions, setCustomInstructions] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -32,11 +33,12 @@ const PresentationGenerator: React.FC<PresentationGeneratorProps> = ({
     setMessage('');
 
     try {
-      // Call API to generate presentation
+      // Call API to generate presentation with custom instructions
       const presentation = await presentationsApi.createPresentationFromDocument({
         document_id: selectedDocumentId,
         slide_count: slideCount,
         tone: tone,
+        custom_instructions: customInstructions || undefined,
       });
 
       // Apply slides to PowerPoint
@@ -88,6 +90,20 @@ const PresentationGenerator: React.FC<PresentationGeneratorProps> = ({
             <option value="marketing">Marketing</option>
             <option value="academic">Academic</option>
           </select>
+        </div>
+
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Custom Instructions (Optional):</label>
+          <textarea
+            value={customInstructions}
+            onChange={(e) => setCustomInstructions(e.target.value)}
+            placeholder="E.g., 'Focus on financial data', 'Include more charts', 'Use simple language', etc."
+            style={styles.textarea}
+            rows={3}
+          />
+          <span style={styles.helpText}>
+            Tell the AI how you want your presentation to look and what to focus on
+          </span>
         </div>
 
         <button
@@ -143,6 +159,22 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
     border: '1px solid #ccc',
     borderRadius: '4px',
+  },
+  textarea: {
+    padding: '8px',
+    fontSize: '14px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    fontFamily: 'inherit',
+    resize: 'vertical' as const,
+    width: '100%',
+    boxSizing: 'border-box' as const,
+  },
+  helpText: {
+    fontSize: '12px',
+    color: '#666',
+    marginTop: '4px',
+    display: 'block',
   },
   button: {
     padding: '12px',

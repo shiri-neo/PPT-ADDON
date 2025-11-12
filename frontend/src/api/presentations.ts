@@ -21,6 +21,7 @@ export interface PresentationCreateRequest {
   document_id: number;
   slide_count: number;
   tone?: string;
+  custom_instructions?: string;
 }
 
 export interface SlideEditRequest {

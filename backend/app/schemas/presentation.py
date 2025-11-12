@@ -20,6 +20,7 @@ class PresentationCreateRequest(BaseModel):
     document_id: int
     slide_count: int = 5
     tone: Optional[str] = None  # formal, casual, marketing, academic, etc.
+    custom_instructions: Optional[str] = None  # User's specific instructions for the presentation
 
 
 class PresentationRead(BaseModel):
