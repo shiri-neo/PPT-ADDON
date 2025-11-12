@@ -64,7 +64,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadSuccess }) => {
           <input
             id="file-input"
             type="file"
-            accept=".txt,.docx"
+            accept=".txt,.docx,.pdf,.pptx"
             onChange={handleFileChange}
             style={styles.fileInput}
           />

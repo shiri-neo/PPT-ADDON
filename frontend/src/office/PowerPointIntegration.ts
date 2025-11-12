@@ -9,9 +9,23 @@ export interface SlideData {
 }
 
 /**
+ * Check if we're running in PowerPoint
+ */
+const isInPowerPoint = (): boolean => {
+  return typeof PowerPoint !== 'undefined' && PowerPoint !== null;
+};
+
+/**
  * Apply multiple slides to the current PowerPoint presentation
  */
 export const applySlides = async (slides: SlideData[]): Promise<void> => {
+  // Check if we're running in PowerPoint
+  if (!isInPowerPoint()) {
+    console.log('Not running in PowerPoint - skipping slide application');
+    console.log('Generated slides:', slides);
+    return Promise.resolve();
+  }
+
   return PowerPoint.run(async (context) => {
     const presentation = context.presentation;
 
@@ -70,6 +84,13 @@ export const updateSlide = async (
   slideIndex: number,
   slideData: SlideData
 ): Promise<void> => {
+  // Check if we're running in PowerPoint
+  if (!isInPowerPoint()) {
+    console.log('Not running in PowerPoint - skipping slide update');
+    console.log('Slide update:', { slideIndex, slideData });
+    return Promise.resolve();
+  }
+
   return PowerPoint.run(async (context) => {
     const presentation = context.presentation;
     const slides = presentation.slides;
@@ -124,6 +145,12 @@ export const updateSlide = async (
  * Get the current slide count
  */
 export const getSlideCount = async (): Promise<number> => {
+  // Check if we're running in PowerPoint
+  if (!isInPowerPoint()) {
+    console.log('Not running in PowerPoint - returning 0 for slide count');
+    return Promise.resolve(0);
+  }
+
   return PowerPoint.run(async (context) => {
     const slides = context.presentation.slides;
     slides.load('items');

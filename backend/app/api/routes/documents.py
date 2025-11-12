@@ -22,12 +22,12 @@ async def upload_document(
     current_org: Organization = Depends(get_current_organization),
 ):
     """
-    Upload a document (txt or docx).
+    Upload a document (txt, docx, pdf, or pptx).
     Stores file metadata and parsed text in database.
     S3 upload is stubbed for now.
     """
     # Validate file type
-    allowed_extensions = [".txt", ".docx"]
+    allowed_extensions = [".txt", ".docx", ".pdf", ".pptx"]
     file_ext = None
     if file.filename:
         file_ext = "." + file.filename.split(".")[-1].lower()
