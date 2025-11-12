@@ -1,5 +1,6 @@
 """Presentation generation and editing endpoints"""
 
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -7,7 +8,7 @@ from app.api.deps import get_db, get_current_user, get_current_organization
 from app.models.user import User
 from app.models.organization import Organization
 from app.models.document import Document
-from app.models.presentation import Slide
+from app.models.presentation import Presentation, Slide
 from app.schemas.presentation import (
     PresentationCreateRequest,
     PresentationRead,
@@ -21,6 +22,45 @@ from app.services.presentations import (
 )
 
 router = APIRouter()
+
+
+@router.get("", response_model=List[PresentationRead])
+def list_presentations(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    current_org: Organization = Depends(get_current_organization),
+):
+    """
+    List all presentations for the current organization.
+    """
+    presentations = (
+        db.query(Presentation)
+        .filter(Presentation.organization_id == current_org.id)
+        .order_by(Presentation.created_at.desc())
+        .all()
+    )
+
+    # Build response with slides for each presentation
+    result = []
+    for presentation in presentations:
+        slides_data = [
+            SlideSchema(
+                title=slide.title,
+                bullets=slide.bullets,
+                notes=slide.notes,
+            )
+            for slide in presentation.slides
+        ]
+        result.append(
+            PresentationRead(
+                id=presentation.id,
+                title=presentation.title,
+                created_at=presentation.created_at,
+                slides=slides_data,
+            )
+        )
+
+    return result
 
 
 @router.post("/from-document", response_model=PresentationRead)

@@ -34,6 +34,14 @@ export interface SlideEditResponse {
 
 export const presentationsApi = {
   /**
+   * List all presentations
+   */
+  listPresentations: async (): Promise<Presentation[]> => {
+    const response = await apiClient.get<Presentation[]>('/presentations');
+    return response.data;
+  },
+
+  /**
    * Create presentation from document
    */
   createPresentationFromDocument: async (

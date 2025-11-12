@@ -11,6 +11,7 @@ import SignupForm from './components/SignupForm';
 import DocumentUpload from './components/DocumentUpload';
 import DocumentList from './components/DocumentList';
 import PresentationGenerator from './components/PresentationGenerator';
+import PresentationsList from './components/PresentationsList';
 import SlideEditor from './components/SlideEditor';
 
 const App: React.FC = () => {
@@ -20,6 +21,7 @@ const App: React.FC = () => {
   const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(null);
   const [currentPresentationId, setCurrentPresentationId] = useState<number | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [presentationsRefreshTrigger, setPresentationsRefreshTrigger] = useState(0);
 
   useEffect(() => {
     // Initialize Office.js
@@ -42,6 +44,8 @@ const App: React.FC = () => {
 
   const handlePresentationCreated = (presentationId: number) => {
     setCurrentPresentationId(presentationId);
+    // Refresh presentations list
+    setPresentationsRefreshTrigger((prev) => prev + 1);
   };
 
   if (!officeReady) {
@@ -92,6 +96,12 @@ const App: React.FC = () => {
           <PresentationGenerator
             selectedDocumentId={selectedDocumentId}
             onPresentationCreated={handlePresentationCreated}
+          />
+
+          <PresentationsList
+            onSelect={setCurrentPresentationId}
+            selectedPresentationId={currentPresentationId}
+            refreshTrigger={presentationsRefreshTrigger}
           />
 
           <SlideEditor presentationId={currentPresentationId} />
