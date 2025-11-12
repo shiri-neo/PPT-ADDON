@@ -66,12 +66,16 @@ def create_presentation_from_document(
 
     # Create slides
     for idx, slide_data in enumerate(slides_data):
+        # Extract image URL from slide data if available
+        image_url = getattr(slide_data, '_image_url', None)
+
         slide = Slide(
             presentation_id=presentation.id,
             index=idx,
             title=slide_data.title,
             bullets=slide_data.bullets,
             notes=slide_data.notes,
+            meta={"image_url": image_url} if image_url else None
         )
         db.add(slide)
 
