@@ -96,7 +96,9 @@ const styles: { [key: string]: React.CSSProperties } = {
   navItemActive: {
     backgroundColor: '#0078d4',
     color: 'white',
-    borderLeft: '4px solid #fff',
+    borderLeftWidth: '4px',
+    borderLeftStyle: 'solid',
+    borderLeftColor: '#fff',
   },
   icon: {
     fontSize: '18px',
