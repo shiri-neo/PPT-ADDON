@@ -2,7 +2,6 @@
 
 import json
 import os
-import aiohttp
 from typing import List, Dict, Optional
 from openai import AsyncOpenAI
 from app.core.config import get_settings
