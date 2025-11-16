@@ -2,13 +2,19 @@
 
 Follow these steps to get your PPT AI Assistant running:
 
+## Prerequisites
+
+- **Python 3.11 or 3.12** (NOT Python 3.13 - it has compatibility issues)
+- Node.js 16+
+- OpenAI API key
+
 ## Step 1: Backend Setup
 
 ```bash
 cd backend
 
-# Create virtual environment (if not exists)
-python3 -m venv venv
+# Create virtual environment with Python 3.12 (if not exists)
+python3.12 -m venv venv
 
 # Activate virtual environment
 source venv/bin/activate  # On Mac/Linux

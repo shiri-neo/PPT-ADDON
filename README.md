@@ -21,10 +21,15 @@ Integrated directly into PowerPoint for quick generation and editing.
 
 ## 📋 Quick Start
 
+### Prerequisites
+- **Python 3.11 or 3.12** (Python 3.13 not yet supported due to library compatibility)
+- Node.js 16+
+- OpenAI API key
+
 ### Backend
 \`\`\`bash
 cd backend
-python -m venv venv
+python3.12 -m venv venv  # Use Python 3.11 or 3.12, NOT 3.13
 source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
 cp .env.example .env
