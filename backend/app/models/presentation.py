@@ -41,6 +41,7 @@ class Slide(Base):
     title = Column(String, nullable=False)
     bullets = Column(JSON, nullable=False)  # List of bullet points as JSON array
     notes = Column(Text, nullable=True)  # Speaker notes
+    meta = Column(JSON, nullable=True)  # Metadata (image_url from DALL-E, etc.)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
@@ -48,3 +49,7 @@ class Slide(Base):
 
     # Relationships
     presentation = relationship("Presentation", back_populates="slides")
+
+    def get_meta(self):
+        """Get metadata as dict"""
+        return self.meta or {}
